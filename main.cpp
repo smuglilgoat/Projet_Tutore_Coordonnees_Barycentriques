@@ -330,20 +330,29 @@ void mouse(int button, int state, int x, int y)
 
 void mouseMotion(int x, int y)
 {
-    if (mouseLeftDown)
-    {
-        cameraAngleY += (x - mouseX);
-        cameraAngleX += (y - mouseY);
-        mouseX = x;
-        mouseY = y;
-    }
-    if (mouseRightDown)
-    {
-        cameraDistance += (y - mouseY) * 0.2f;
-        mouseY = y;
-    }
+    
 
     glutPostRedisplay();
+}
+
+int oldX, oldY;
+
+void handleInput() {
+    int x =  ImGui::GetMousePos().x;
+    int y =  ImGui::GetMousePos().y;
+
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Left) )
+    {
+        cameraAngleY += (x - oldX);
+        cameraAngleX += (y - oldY);
+    }
+    if (ImGui::IsMouseDown(ImGuiMouseButton_Right))
+    {
+        cameraDistance += (y - oldY) * 0.2f;
+    }
+
+    oldX = x;
+    oldY = y;
 }
 
 void my_display_code()
@@ -385,29 +394,29 @@ void my_display_code()
     }
 }
 
+
 void glut_display_func()
-{
+{   
+    handleInput();
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGLUT_NewFrame();
 
     my_display_code();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Rendering
     ImGui::Render();
     ImGuiIO &io = ImGui::GetIO();
     glViewport(0, 0, (GLsizei)io.DisplaySize.x, (GLsizei)io.DisplaySize.y);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    // glUseProgram(0); // You may want this if using this code in an OpenGL 3+ context where shaders may be bound, but prefer using the GL3+ code.
 
-        glutSwapBuffers();
+    // glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+    // glUseProgram(0); // You may want this if using this code in an OpenGL 3+ context where shaders may be bound, but prefer using the GL3+ code.
 
 
     glMatrixMode(GL_MODELVIEW);
     /* effacement de l'image avec la couleur de fond */
     //	glClear(GL_COLOR_BUFFER_BIT);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //       glClearDepth(10.0f);                         // 0 is near, >0 is far
 
     glPushMatrix();
@@ -445,9 +454,7 @@ int main(int argc, char **argv)
     // We will also call ImGui_ImplGLUT_InstallFuncs() to get all the other functions installed for us,
     // otherwise it is possible to install our own functions and call the imgui_impl_glut.h functions ourselves.
     glutDisplayFunc(glut_display_func);
-    glutKeyboardFunc(clavier);
-    glutMouseFunc(mouse);
-    glutMotionFunc(mouseMotion);
+    
     //-------------------------------
 
     //-------------------------------
@@ -459,6 +466,9 @@ int main(int argc, char **argv)
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
     // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //glutKeyboardFunc(clavier);
+    //glutMouseFunc(mouse);
+    //glutMotionFunc(mouseMotion);
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
